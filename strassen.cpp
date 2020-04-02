@@ -1,7 +1,7 @@
-#include <iostream>
 #include <math.h>
 #include <time.h> 
 #include <string.h>
+#include <fstream>
 using namespace std;
 
 // after this point normal matrix operation will take over
@@ -40,28 +40,35 @@ class Matrix
 			cout << "\n";
 		}
 
-		void read_in(file){
+		// void read_in(file){
 
-		}
+		// }
 
 };
-int* read_in(filename){
-	ifstream file (filename);
-	if (file.is_open())
+int* read_in(string filename){
+	fstream in_file(filename);
+	if (in_file.is_open())
 	{	string line;
 		int lines = 0;
-		while (getline(file,line)){	
+		while (getline(in_file,line)){	
 			lines++;
 		}
 
 		int *all_array_data = new int[lines];
+
 		for (int i =0; i < lines; i++){
-			getline (file, line)
+			getline (in_file, line)
 			all_array_data[i] = stoi(line);
 		}
-		file.close();
+		in_file.close();
+		return all_array_data;
 	}
-	else cout << "Unable to open file";
+	else {
+		cout << "Unable to open file";
+		return NULL;
+	}
+
+	
 }
 
 Matrix conventional(Matrix a, Matrix b){
@@ -93,9 +100,9 @@ int main(){
 	mat_b.print_matrix();
 	conventional(mat_a, mat_b).print_matrix();
 
-	read_in()
-	Matrix mat_a(dimension);
-	Matrix mat_b(dimension);
+	read_in("ascii_file.txt");
+	// Matrix mat_a(dimension);
+	// Matrix mat_b(dimension);
 	return 0;
 }
 // generates the matrices based on a given size, 
