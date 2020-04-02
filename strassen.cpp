@@ -1,6 +1,7 @@
 #include <iostream>
 #include <math.h>
 #include <time.h> 
+#include <string.h>
 using namespace std;
 
 // after this point normal matrix operation will take over
@@ -44,16 +45,19 @@ class Matrix
 		}
 
 };
-void read_in(filename, Matrix a, Matrix b){
+int* read_in(filename){
 	ifstream file (filename);
 	if (file.is_open())
-	{	
-		int dim_counter = 0;
-		int *all_array_data
-		while ( getline (file,line) )
-		{	
-			dim_counter++;
-			cout << line << '\n';
+	{	string line;
+		int lines = 0;
+		while (getline(file,line)){	
+			lines++;
+		}
+
+		int *all_array_data = new int[lines];
+		for (int i =0; i < lines; i++){
+			getline (file, line)
+			all_array_data[i] = stoi(line);
 		}
 		file.close();
 	}
