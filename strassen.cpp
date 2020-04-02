@@ -32,6 +32,31 @@ class Matrix
 				this->data[i] = rand() %2;
 			}
 		}
+		void init_randadjacency(int probability){
+			for (int i=0; i < array_len; i++){
+				if ((i % dims) > (i - i% dims)/dims){
+					//if the entry is in the upper triangle 
+					int raw = rand() % 100;
+					if (raw <= probability){
+						this->data[i] = 1;
+					}
+					//Don't add anything to the matrix in the lower triangle or diagonal
+				}
+			}   
+			//Copy from upper to lower	
+			for (int i=0; i < array_len; i++){
+				int column = i % dims;
+				int row = ((i - (i%dims))/dims); 
+				// if this isn't divisible add or subtract 1, it should be
+				if (column < row){
+					//if the entry is in the lower triangle or diagonal
+					int mirror = column*dims + row;
+					//Compute mirror image
+					this->data[i] = data[mirror];
+					//This might not access data[mirror] correctly
+				}
+			}	
+		}
 
 		void print_matrix(){
 			for (int i = 0; i < array_len; i++){
@@ -102,6 +127,24 @@ int strass(int val){
 	return 0;
 }
 
+int triangleCount(int probability){
+    //initialize a random 1024x1024 adjacency matrix
+    Matrix mat(1024); //we hardcode this 
+    mat.init_randadjacency(probability);
+    2mat = strass(mat, mat);
+    3mat = strass(2mat, mat);
+    //count number of triangles
+    int diagonaledges = 0;
+    for (int i = 0; i < array_len; i = i + array_len + 1){
+        //We only hit the diagonal entries by adding dim + 1 to i each time
+        if (data[i] == 1){
+            diagonaledges = diagonaledges + 1;
+        }
+    }
+    int triangles = diagonaledges / 6;
+    print(triangles)
+    return (triangles);
+}
 
 int main(){
 	Matrix mat_a(dimension);
