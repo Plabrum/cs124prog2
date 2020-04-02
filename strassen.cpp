@@ -15,23 +15,24 @@ class Matrix
 {
 	public:
 		int dims = 0;
+		int array_len = 0;
 		int *output_matrix;
 
 		Matrix(int size){
 			dims = size;
-			output_matrix = new int[pow(dims,2)];
-			
+			array_len = pow(dims,2);
+			output_matrix = new int[array_len];
 		}
 		
 
 		void initialise(){
-			for (int i=0; i < pow(dims,2); i++){
-				this->output_matrix[i] = rand() %1;
+			for (int i=0; i < array_len; i++){
+				this->output_matrix[i] = rand() %2;
 			}
 		}
 
 		void print_matrix(){
-			for (int i = 0; i < dims; i++){
+			for (int i = 0; i < array_len; i++){
 				cout << this->output_matrix[i] << " ";
 			}
 			cout << "\n";
@@ -66,6 +67,10 @@ int strass(int val){
 
 
 int main(){
+
+	Matrix start(dimension);
+	start.initialise();
+	start.print_matrix();
 	cout << "hello, world! \n";
 	return 0;
 }
