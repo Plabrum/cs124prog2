@@ -5,7 +5,8 @@ using namespace std;
 
 // after this point normal matrix operation will take over
 int crossover = 128;
-int dimension = 2048;
+// int dimension = 2048;
+int dimension = 16;
 int current_dim = dimension;
 
 // NOTES
@@ -14,46 +15,60 @@ int current_dim = dimension;
 class Matrix
 {
 	public:
-		int dims = 0;
+		int dims;
 		int array_len = 0;
-		int *output_matrix;
+		int *data;
 
 		Matrix(int size){
 			dims = size;
 			array_len = pow(dims,2);
-			output_matrix = new int[array_len];
+			data = new int[array_len];
 		}
 		
 
-		void initialise(){
+		void init_rand(){
 			for (int i=0; i < array_len; i++){
-				this->output_matrix[i] = rand() %2;
+				this->data[i] = rand() %2;
 			}
 		}
 
 		void print_matrix(){
 			for (int i = 0; i < array_len; i++){
-				cout << this->output_matrix[i] << " ";
+				cout << this->data[i] << " ";
 			}
 			cout << "\n";
 		}
 
-};
+		void read_in(file){
 
-int create_matrix (){
-	int output_matrix[dimension][dimension];
-	for (int i=0; i < dimension; i++){
-		for (int j =0; j < dimension; j++){
-			output_matrix[i][j] = rand() %1;
 		}
+
+};
+void read_in(filename, Matrix a, Matrix b){
+	ifstream file (filename);
+	if (file.is_open())
+	{	
+		int dim_counter = 0;
+		int *all_array_data
+		while ( getline (file,line) )
+		{	
+			dim_counter++;
+			cout << line << '\n';
+		}
+		file.close();
 	}
-	// create matrix
-	return 0;
+	else cout << "Unable to open file";
 }
 
-int conventional (){
+Matrix conventional(Matrix a, Matrix b){
 	// perform conventional matrix multi
-	return 0;
+	assert(a.dims == b.dims);
+	Matrix output_matrix(a.dims);
+
+	for (int i = 0; i < output_matrix.array_len; i++){
+		output_matrix.data[i] = a.data[i] + b.data[i];
+	}
+	return output_matrix;
 }
 
 int strass(int val){
@@ -61,17 +76,22 @@ int strass(int val){
 		//perform strassen
 		strass(val);
 	}
-	conventional();
 	return 0;
 }
 
 
 int main(){
+	Matrix mat_a(dimension);
+	Matrix mat_b(dimension);
+	mat_a.init_rand();
+	mat_b.init_rand();
+	mat_a.print_matrix();
+	mat_b.print_matrix();
+	conventional(mat_a, mat_b).print_matrix();
 
-	Matrix start(dimension);
-	start.initialise();
-	start.print_matrix();
-	cout << "hello, world! \n";
+	read_in()
+	Matrix mat_a(dimension);
+	Matrix mat_b(dimension);
 	return 0;
 }
 // generates the matrices based on a given size, 
