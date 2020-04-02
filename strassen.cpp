@@ -1,7 +1,7 @@
-#include <math.h>
-#include <time.h> 
-#include <string.h>
+#include <iostream>
+#include <string>
 #include <fstream>
+# include <cmath>
 using namespace std;
 
 // after this point normal matrix operation will take over
@@ -40,28 +40,40 @@ class Matrix
 			cout << "\n";
 		}
 
-		// void read_in(file){
-
-		// }
+		void read(int* array_in){
+			this->data = array_in;
+		}
 
 };
 int* read_in(string filename){
 	fstream in_file(filename);
 	if (in_file.is_open())
 	{	string line;
-		int lines = 0;
+		int rows = 0;
+		//Count how many rows in input file
 		while (getline(in_file,line)){	
-			lines++;
+			rows++;
 		}
 
-		int *all_array_data = new int[lines];
+		int *data_a = new int[rows/2];
+		int *data_b= new int[rows/2];
 
-		for (int i =0; i < lines; i++){
-			getline (in_file, line)
-			all_array_data[i] = stoi(line);
+		for (int i =0; i < rows/2; i++){
+			getline (in_file, line);
+			data_a[i] = stoi(line);
+		}
+		for (int i = rows/2; i < rows; i++){
+			getline (in_file, line);
+			data_b[i] = stoi(line);
 		}
 		in_file.close();
-		return all_array_data;
+
+		// hacky stuff here to get an array of pointers
+		int* dim_ptr = nullptr;
+		*dim_ptr = (int) sqrt(rows/2);
+		int* arr_data[3]{dim_ptr, data_a, data_b};
+		int* arr_ptr = &arr_data[0];
+		return arr_ptr;
 	}
 	else {
 		cout << "Unable to open file";
@@ -100,9 +112,10 @@ int main(){
 	mat_b.print_matrix();
 	conventional(mat_a, mat_b).print_matrix();
 
-	read_in("ascii_file.txt");
-	// Matrix mat_a(dimension);
-	// Matrix mat_b(dimension);
+	int* data_ptr = read_in("ascii_file.txt");
+	Matrix mat_c(*data_ptr[0]);
+	mat_c.read(*data_ptr[1])
+	Matrix mat_d(dimension);
 	return 0;
 }
 // generates the matrices based on a given size, 
