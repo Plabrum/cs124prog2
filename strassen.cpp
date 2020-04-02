@@ -1,4 +1,5 @@
 #include <iostream>
+#include <math.h>
 #include <time.h> 
 using namespace std;
 
@@ -14,29 +15,26 @@ class Matrix
 {
 	public:
 		int dims = 0;
-		// int output_matrix;
+		int *output_matrix;
 
-		Matrix(int dimension){
-			int dims = dimension;
-			int output_matrix[dims][dims];
+		Matrix(int size){
+			dims = size;
+			output_matrix = new int[pow(dims,2)];
+			
 		}
 		
 
 		void initialise(){
-			for (int i=0; i < dims; i++){
-				for (int j =0; j < dims; j++){
-					output_matrix[i][j] = rand() %1;
-				}
+			for (int i=0; i < pow(dims,2); i++){
+				this->output_matrix[i] = rand() %1;
 			}
 		}
 
 		void print_matrix(){
 			for (int i = 0; i < dims; i++){
-				for (int j = 0; j < dims; j++){
-					cout << output_matrix[i][j] << " ";
-				}
-				cout << "\n";
+				cout << this->output_matrix[i] << " ";
 			}
+			cout << "\n";
 		}
 
 };
