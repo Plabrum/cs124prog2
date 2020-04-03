@@ -290,6 +290,7 @@ int simplecalc(int crossover, Matrix a, Matrix b){
     return 0;
 }
 
+//TODO: command line compatibility in main
 
 bool matrix_equal(Matrix a, Matrix b){
 	//assert(a.dims == b.dims);
@@ -325,7 +326,13 @@ bool matrix_equal(Matrix a, Matrix b){
 
 //change
 
-int main(){
+int main(int argc, char *argv[]){
+	if (argc != 2){
+		cout << "Try again with 2 command line arguments"
+		return 0;
+	}
+	dimension = argv[0];
+	filename = argv[1];
 	/*
 	cout << "conventional test: \n\n";
 	Matrix mat_a(dimension^2);
