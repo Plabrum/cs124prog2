@@ -387,6 +387,21 @@ int main(int argc, char *argv[]){
 	}
 	else if (setting == "1"){
 		// Do analysis for optimal cross over point
+		// triangleCount(4, 3);
+		// simplecalc(625, mat_a, mat_b);
+		
+		//  Read in from file
+		int* data_ptr = read_in(filename);
+	    // write to matrix A
+		Matrix mat_a(data_ptr[0]);
+		mat_a.read(data_ptr, "first");
+		// Write to matrix B
+		Matrix mat_b(data_ptr[0]);
+		mat_b.read(data_ptr, "second");
+		// free memory
+		delete data_ptr;
+
+		fullOptimize(0, 1024, mat_a, mat_b);
 
 	}
 	else if (setting == "2"){
@@ -427,11 +442,6 @@ int main(int argc, char *argv[]){
 		write_out("ascii_file.txt",1, mat_b);
 	}
 	
-
-	// triangleCount(4, 3);
-
-	// simplecalc(625, mat_a, mat_b);
-	// fullOptimize(0, 1024, mat_a, mat_b);
 
 	return 0;
 }
