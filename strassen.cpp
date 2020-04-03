@@ -138,44 +138,122 @@ int* read_in(string filename){
 	}
 }
 
-Matrix conventional(Matrix a, Matrix b){
+Matrix conv_mul(Matrix a, Matrix b){
 	// perform conventional matrix multi
 	assert(a.dims == b.dims);
 	Matrix output_matrix(a.array_len);
-	cout << "Output matrix: " << a.dims <<"\n";
 
 	// iterate through the output matrix
 	for (int i = 0; i < output_matrix.dims; i++){
 		for (int j = 0; j < output_matrix.dims; j++){
 			int sum =0;
 			for (int k = 0; k < output_matrix.dims; k++){
-				// I val
 				int a_val = a.data[(i*output_matrix.dims + k)];
-				int b_val = b.data[((i+k)*output_matrix.dims + j)];
+				int b_val = b.data[(k*output_matrix.dims + j)];
 				sum += a_val*b_val;
 			}
-			cout << "for i = " << i << " for j = " << j << " Sum: " << sum << "\n";
 			output_matrix.data[(i*output_matrix.dims) +j] = sum;
 		}
 	}
 	return output_matrix;
 }
 
-int strass(int val){
-	while (current_dim > crossover){
-		//perform strassen
-		strass(val);
+Matrix m_add(Matrix a, Matrix b){
+	// perform conventional matrix multi
+	assert(a.dims == b.dims);
+	Matrix output_matrix(a.dims);
+
+	for (int i = 0; i < output_matrix.array_len; i++){
+		output_matrix.data[i] = a.data[i] + b.data[i];
 	}
-	return 0;
+	return output_matrix;
+}
+
+Matrix m_sub(Matrix a, Matrix b){
+	// perform conventional matrix multi
+	assert(a.dims == b.dims);
+	Matrix output_matrix(a.dims);
+
+	for (int i = 0; i < output_matrix.array_len; i++){
+		output_matrix.data[i] = a.data[i] - b.data[i];
+	}
+	return output_matrix;
+}
+
+Matrix combine(Matrix a, Matrix b, Matrix c, Matrix d){
+
+	Matrix output_matrix(pow(a.dims*2, 2))
+	// go through output
+	for (int i=0; i<output_matrix.dims; i++){
+		for (int j=0; j<output_matrix; j++){
+			if (i<a.dims){
+				if (j<a.dims){
+					// top left
+					output_matrix.data[(i*output_matrix.dims) +j] = a.data[(i*a.dims) +j];
+				}
+				else{
+					// top right
+					output_matrix.data[(i*output_matrix.dims) +j] = b.data[(i*c.dims) + (j - b.dims)];
+				}
+			}
+			else {
+				if (j<a.dims){
+					// bottom left
+					output_matrix.data[(i*output_matrix.dims) +j] = c.data[((i - c.dims)*c.dims) +j];
+				}
+				else{
+					// bottom right
+					output_matrix.data[(i*output_matrix.dims) +j] = d.data[((i - d.dims)*d.dims) + (j - d.dims)];
+				}
+			}
+		}
+	}
+
+	return output_matrix;
+}
+
+Matrix strass(int crossover, Matrix a, Matrix b){
+	if (a.dims > crossover){
+		//perform strassen
+		Matrix a11 = split(a, 1);
+		Matrix a12 = split(a, 2);
+		Matrix a21 = split(a, 3);
+		Matrix a22 = split(a, 4);
+
+		Matrix b11 = split(b, 1);
+		Matrix b12 = split(b, 2);
+		Matrix b21 = split(b, 3);
+		Matrix b22 = split(b, 4);
+
+
+		Matrix m1 = conv_mul(m_add(a11, a22), m_add(b11, b22));
+		Matrix m2 = conv_mul(m_add(a21, a22), b11);
+		Matrix m3 = conv_mul(a11, m_sub(b12, b22));
+		Matrix m4 = conv_mul(a22, m_sub(b21, b11));
+		Matrix m5 = conv_mul(m_add(a11, a12), b22);
+		Matrix m6 = conv_mul(m_sub(a21, a11), m_add(b11, b12));
+		Matrix m7 = conv_mul(m_sub(a12, a22), m_add(b21, b22));
+
+		Matrix c11 = m_add(m1, m_sub(m4, m_add(m5, m7)));
+		Matrix c12 = m_add(m3, m5);
+		Matrix c21 = m_add(m2, m4);
+		Matrix c22 = m_sub(m1, m_add(m2, m_add(m3, m6)));
+		return combine(c11,c12,c21,c22);
+	}
+	else{
+		return conv_mul(a,b)
+	}
 }
 
 bool matrix_equal(Matrix a, Matrix b){
 	assert(a.dims == b.dims);
 	for (int i=0; i < a.array_len; i++){
 		if (a.data[i] != b.data[i]){
+			cout << "Matrices are not equal\n";
 			return false;
 		}
 	}
+	cout << "Matrices are equal!\n";
 	return true;
 }
 
@@ -223,7 +301,8 @@ int main(){
 	delete data_ptr;
 
 	cout << "\nconventional dot product: ";
-	conventional(mat_c, mat_d).print_matrix();
+	Matrix dot = conv_mul(mat_c, mat_d);
+	dot.print_matrix();
 
 	int* sol_ptr = read_in("solution.txt");
 	Matrix mat_sol(sol_ptr[0]*2);
@@ -232,6 +311,7 @@ int main(){
 	mat_sol.print_matrix();
 	delete sol_ptr;
 
+	matrix_equal(mat_sol, dot);
 	// check correctnes against python version
 
 	return 0;
