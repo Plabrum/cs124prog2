@@ -32,13 +32,21 @@ class Matrix
 				this->data[i] = rand() %2;
 			}
 		}
+
 		void init_randadjacency(int probability){
 			for (int i=0; i < array_len; i++){
+				int column = i % dims;
+				int row = ((i - (i%dims))/dims); 
+				printf("( %d,  %d ):", column, row);
 				if ((i % dims) > (i - i% dims)/dims){
 					//if the entry is in the upper triangle 
 					int raw = rand() % 100;
+					printf("random number: %d", raw);
 					if (raw <= probability){
 						this->data[i] = 1;
+					}
+					else {
+						this->data[i] = 0;
 					}
 					//Don't add anything to the matrix in the lower triangle or diagonal
 				}
@@ -58,11 +66,18 @@ class Matrix
 			}	
 		}
 
+
 		void print_matrix(){
 			for (int i = 0; i < array_len; i++){
 				cout << this->data[i] << " ";
 			}
 			cout << "\n";
+		}
+
+		void print_diags(){
+			for (int i = 0; i < dims; i++){
+				cout << this->data[i*dims + i] << "\n";
+			}
 		}
 
 		void read(int* array_in, string option){
@@ -126,7 +141,8 @@ int* read_in(string filename){
 Matrix conventional(Matrix a, Matrix b){
 	// perform conventional matrix multi
 	assert(a.dims == b.dims);
-	Matrix output_matrix(a.dims);
+	Matrix output_matrix(a.array_len);
+	cout << "Output matrix: " << a.dims <<"\n";
 
 	// iterate through the output matrix
 	for (int i = 0; i < output_matrix.dims; i++){
@@ -134,9 +150,9 @@ Matrix conventional(Matrix a, Matrix b){
 			int sum =0;
 			for (int k = 0; k < output_matrix.dims; k++){
 				// I val
-				int i_val = i*output_matrix.dims + k;
-				int j_val = (i+k)*output_matrix.dims + j;
-				sum += i_val*j_val;
+				int a_val = a.data[(i*output_matrix.dims + k)];
+				int b_val = b.data[((i+k)*output_matrix.dims + j)];
+				sum += a_val*b_val;
 			}
 			cout << "for i = " << i << " for j = " << j << " Sum: " << sum << "\n";
 			output_matrix.data[(i*output_matrix.dims) +j] = sum;
@@ -154,32 +170,39 @@ int strass(int val){
 }
 
 bool matrix_equal(Matrix a, Matrix b){
-	
+	assert(a.dims == b.dims);
+	for (int i=0; i < a.array_len; i++){
+		if (a.data[i] != b.data[i]){
+			return false;
+		}
+	}
+	return true;
 }
 
 // int triangleCount(int probability){
 //     //initialize a random 1024x1024 adjacency matrix
 //     Matrix mat(1024); //we hardcode this 
+//     int array_len = pow(1024,2);
 //     mat.init_randadjacency(probability);
-//     2mat = strass(mat, mat);
-//     3mat = strass(2mat, mat);
+//     Matrix twomat = strass(mat, mat);
+//     Matrix threemat = strass(twomat, mat);
 //     //count number of triangles
 //     int diagonaledges = 0;
 //     for (int i = 0; i < array_len; i = i + array_len + 1){
 //         //We only hit the diagonal entries by adding dim + 1 to i each time
-//         if (data[i] == 1){
+//         if (mat.data[i] == 1){
 //             diagonaledges = diagonaledges + 1;
 //         }
 //     }
 //     int triangles = diagonaledges / 6;
-//     cout << triangles;
+//     printf("Triangles: %d", triangles);
 //     return (triangles);
 // }
 
 int main(){
 	cout << "conventional test: \n\n";
-	// Matrix mat_a(dimension);
-	// Matrix mat_b(dimension);
+	// Matrix mat_a(dimension^2);
+	// Matrix mat_b();
 	// mat_a.init_rand();
 	// mat_b.init_rand();
 	// mat_a.print_matrix();
@@ -197,16 +220,15 @@ int main(){
 	mat_d.read(data_ptr, "second");
 	cout << "Matrix D: ";
 	mat_d.print_matrix();
-
 	delete data_ptr;
 
-	cout << "\nconventional dot product: \n";
+	cout << "\nconventional dot product: ";
 	conventional(mat_c, mat_d).print_matrix();
 
 	int* sol_ptr = read_in("solution.txt");
 	Matrix mat_sol(sol_ptr[0]*2);
 	mat_sol.read(sol_ptr, "all");
-	cout << "Matrix Solution: ";
+	cout << "\nMatrix Solution: ";
 	mat_sol.print_matrix();
 	delete sol_ptr;
 
