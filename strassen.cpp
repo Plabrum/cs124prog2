@@ -2,6 +2,7 @@
 #include <string>
 #include <fstream>
 # include <cmath>
+#include <chrono>
 using namespace std;
 
 // after this point normal matrix operation will take over
@@ -9,6 +10,8 @@ int crossover = 128;
 // int dimension = 2048;
 int dimension = 4;
 int current_dim = dimension;
+
+
 
 // NOTES
 // Change to be able to handle 32 bit numbers - perhaps use long int
@@ -140,7 +143,7 @@ int* read_in(string filename){
 
 Matrix conventional(Matrix a, Matrix b){
 	// perform conventional matrix multi
-	assert(a.dims == b.dims);
+	//assert(a.dims == b.dims);
 	Matrix output_matrix(a.array_len);
 	cout << "Output matrix: " << a.dims <<"\n";
 
@@ -169,8 +172,48 @@ int strass(int val){
 	return 0;
 }
 
+int fullOptimize(int bottom, int top, Matrix mat_a, Matrix mat_b){
+    //Find goal time
+    auto start1 = chrono::high_resolution_clock::now(); 
+    //strass(top, mat_a, mat_b);
+    auto stop1 = chrono::high_resolution_clock::now(); 
+    auto durationtop = chrono::duration_cast<chrono::microseconds>(stop1 - start1); 
+
+    auto start2 = chrono::high_resolution_clock::now(); 
+    //strass(bottom, mat_a, mat_b);
+    auto stop2 = chrono::high_resolution_clock::now(); 
+    auto durationbottom = chrono::duration_cast<chrono::microseconds>(stop2 - start2); 
+    while (top - bottom > 10){
+        if (durationtop > durationbottom){
+            top = (top+bottom)/2;
+            cout << top << "\t";
+            cout << bottom << "\t";
+            cout << "up" << "\n";
+            fullOptimize(bottom, top, mat_a, mat_b);
+        } 
+        else {
+            bottom = (top+bottom)/2;
+            cout << top << "\t";
+            cout << bottom <<"\t" ;
+            cout << "down" << "\n";
+            fullOptimize(bottom,top, mat_a, mat_b);
+        }
+    }
+}
+
+int simplecalc(int crossover, Matrix a, Matrix b){
+    //Find time
+    auto start = chrono::high_resolution_clock::now(); 
+    //strass(crossover, a, b);
+    auto stop = chrono::high_resolution_clock::now(); 
+    auto durationS = chrono::duration_cast<chrono::microseconds>(stop - start);
+    cout << durationS.count();
+    return 0;
+}
+
+
 bool matrix_equal(Matrix a, Matrix b){
-	assert(a.dims == b.dims);
+	//assert(a.dims == b.dims);
 	for (int i=0; i < a.array_len; i++){
 		if (a.data[i] != b.data[i]){
 			return false;
@@ -199,16 +242,20 @@ bool matrix_equal(Matrix a, Matrix b){
 //     return (triangles);
 // }
 
+//change
+
 int main(){
 	cout << "conventional test: \n\n";
-	// Matrix mat_a(dimension^2);
-	// Matrix mat_b();
-	// mat_a.init_rand();
-	// mat_b.init_rand();
-	// mat_a.print_matrix();
+	Matrix mat_a(dimension^2);
+	Matrix mat_b(dimension^2);
+	mat_a.init_rand();
+	mat_b.init_rand();
+	mat_a.print_matrix();
 	// mat_b.print_matrix();
-	
+	// simplecalc(625, mat_a, mat_b);
+	fullOptimize(0, 1024, mat_a, mat_b);
 
+    /*
 	int* data_ptr = read_in("ascii_file.txt");
 
 	Matrix mat_c(data_ptr[0]);
@@ -220,7 +267,7 @@ int main(){
 	mat_d.read(data_ptr, "second");
 	cout << "Matrix D: ";
 	mat_d.print_matrix();
-	delete data_ptr;
+	delete data_ptr;a
 
 	cout << "\nconventional dot product: ";
 	conventional(mat_c, mat_d).print_matrix();
@@ -231,11 +278,12 @@ int main(){
 	cout << "\nMatrix Solution: ";
 	mat_sol.print_matrix();
 	delete sol_ptr;
-
+    */
 	// check correctnes against python version
 
 	return 0;
 }
+
 // generates the matrices based on a given size, 
 
 
