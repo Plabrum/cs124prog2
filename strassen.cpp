@@ -5,16 +5,11 @@
 #include <chrono>
 using namespace std;
 
-// after this point normal matrix operation will take over
-int crossover = 128;
-// int dimension = 2048;
-int dimension = 4;
-int current_dim = dimension;
-
-
-
 // NOTES
 // Change to be able to handle 32 bit numbers - perhaps use long int
+
+//Global debug tool
+bool debug = false;
 
 class Matrix
 {
@@ -141,46 +136,156 @@ int* read_in(string filename){
 	}
 }
 
-Matrix conventional(Matrix a, Matrix b){
+void write_out(string filename, bool add, Matrix a){
+
+	fstream out_file(filename);
+	if (out_file.is_open()){
+		if (add) {
+			out_file.seekp (0, ios::end);
+		}
+		for (int i=0; i<a.array_len; i++){
+			out_file << a.data[i] << "\n";
+		}
+		out_file.close();
+	}
+	else cout << "unable to open output file \n";
+}
+
+Matrix conv_mul(Matrix a, Matrix b){
 	// perform conventional matrix multi
 	//assert(a.dims == b.dims);
 	Matrix output_matrix(a.array_len);
-	cout << "Output matrix: " << a.dims <<"\n";
 
 	// iterate through the output matrix
 	for (int i = 0; i < output_matrix.dims; i++){
 		for (int j = 0; j < output_matrix.dims; j++){
 			int sum =0;
 			for (int k = 0; k < output_matrix.dims; k++){
-				// I val
 				int a_val = a.data[(i*output_matrix.dims + k)];
-				int b_val = b.data[((i+k)*output_matrix.dims + j)];
+				int b_val = b.data[(k*output_matrix.dims + j)];
 				sum += a_val*b_val;
 			}
-			cout << "for i = " << i << " for j = " << j << " Sum: " << sum << "\n";
 			output_matrix.data[(i*output_matrix.dims) +j] = sum;
 		}
 	}
 	return output_matrix;
 }
 
-int strass(int val){
-	while (current_dim > crossover){
-		//perform strassen
-		strass(val);
+Matrix m_add(Matrix a, Matrix b){
+	//assert(a.dims == b.dims);
+	if (debug) (cout << "Doing Add, A dims: " << a.dims << " B dims: " << b.dims << "\n");
+	Matrix output_matrix(a.array_len);
+	for (int i = 0; i < output_matrix.array_len; i++){
+		output_matrix.data[i] = a.data[i] + b.data[i];
 	}
-	return 0;
+	return output_matrix;
 }
 
-int fullOptimize(int bottom, int top, Matrix mat_a, Matrix mat_b){
+Matrix m_sub(Matrix a, Matrix b){
+	//assert(a.dims == b.dims);
+	 if (debug) (cout << "Doing Subtract, A dims: " << a.dims << " B dims: " << b.dims << "\n");
+	Matrix output_matrix(a.array_len);
+
+	for (int i = 0; i < output_matrix.array_len; i++){
+		output_matrix.data[i] = a.data[i] - b.data[i];
+	}
+	return output_matrix;
+}
+
+Matrix combine(Matrix a, Matrix b, Matrix c, Matrix d){
+
+	Matrix output_matrix(pow(a.dims*2, 2));
+	// go through output
+	for (int i=0; i<output_matrix.dims; i++){
+		for (int j=0; j<output_matrix.dims; j++){
+			if (i<a.dims){
+				if (j<a.dims){
+					// top left
+					output_matrix.data[(i*output_matrix.dims) +j] = a.data[(i*a.dims) +j];
+				}
+				else{
+					// top right
+					output_matrix.data[(i*output_matrix.dims) +j] = b.data[(i*c.dims) + (j - b.dims)];
+				}
+			}
+			else {
+				if (j<a.dims){
+					// bottom left
+					output_matrix.data[(i*output_matrix.dims) +j] = c.data[((i - c.dims)*c.dims) +j];
+				}
+				else{
+					// bottom right
+					output_matrix.data[(i*output_matrix.dims) +j] = d.data[((i - d.dims)*d.dims) + (j - d.dims)];
+				}
+			}
+		}
+	}
+
+	return output_matrix;
+}
+
+Matrix split(Matrix a, int ot_i, int ot_j){
+	Matrix output_matrix(pow(a.dims/2, 2));
+	if (debug) (cout << "Doing split, input dims: " << a.dims << " Output dims: " << output_matrix.dims << "\n");
+	for (int i=0; i<output_matrix.dims; i++){
+		for (int j=0; j<output_matrix.dims; j++){
+			output_matrix.data[(i*output_matrix.dims) +j] = a.data[((i+ot_i*output_matrix.dims)*a.dims) +j +ot_j*output_matrix.dims];
+		}
+	}
+	
+	return output_matrix;
+}
+
+Matrix strass(int crossover, Matrix a, Matrix b){
+	if (a.dims > crossover){
+		//perform strassen
+		if (debug) (cout << "Doing Strass, dims of a: " << a.dims << " dims of b: " << b.dims << "\n");
+		Matrix a11 = split(a, 0, 0);
+		Matrix a12 = split(a, 0, 1);
+		Matrix a21 = split(a, 1, 0);
+		Matrix a22 = split(a, 1, 1);
+
+		Matrix b11 = split(b, 0, 0);
+		Matrix b12 = split(b, 0, 1);
+		Matrix b21 = split(b, 1, 0);
+		Matrix b22 = split(b, 1, 1);
+
+
+		Matrix m1 = strass(crossover, m_add(a11, a22), m_add(b11, b22));
+		Matrix m2 = strass(crossover, m_add(a21, a22), b11);
+		Matrix m3 = strass(crossover, a11, m_sub(b12, b22));
+		Matrix m4 = strass(crossover, a22, m_sub(b21, b11));
+		Matrix m5 = strass(crossover, m_add(a11, a12), b22);
+		Matrix m6 = strass(crossover, m_sub(a21, a11), m_add(b11, b12));
+		Matrix m7 = strass(crossover, m_sub(a12, a22), m_add(b21, b22));
+
+		Matrix c11 = m_add(m1, m_sub(m4, m_add(m5, m7)));
+		Matrix c12 = m_add(m3, m5);
+		Matrix c21 = m_add(m2, m4);
+		Matrix c22 = m_sub(m1, m_add(m2, m_add(m3, m6)));
+
+		if (debug){
+			cout << "Completed strassen arthmetic, Dim Check!,";
+			cout << "\nc11: " << c11.dims << "\nc12: " << c12.dims << "\nc21: " << c21.dims << "\nc22: " << c22.dims << "\n";	
+		}
+		
+		return combine(c11,c12,c21,c22);
+	}
+	else{
+		if (debug) (cout << "Doing Conventional dims of a: " << a.dims << " dims of b: " << b.dims << "\n");
+		return conv_mul(a,b);
+	}
+}
+
+void fullOptimize(int bottom, int top, Matrix mat_a, Matrix mat_b){
     //Find goal time
     auto start1 = chrono::high_resolution_clock::now(); 
-    //strass(top, mat_a, mat_b);
+    strass(top, mat_a, mat_b);
     auto stop1 = chrono::high_resolution_clock::now(); 
     auto durationtop = chrono::duration_cast<chrono::microseconds>(stop1 - start1); 
 
     auto start2 = chrono::high_resolution_clock::now(); 
-    //strass(bottom, mat_a, mat_b);
+    strass(bottom, mat_a, mat_b);
     auto stop2 = chrono::high_resolution_clock::now(); 
     auto durationbottom = chrono::duration_cast<chrono::microseconds>(stop2 - start2); 
     while (top - bottom > 10){
@@ -204,89 +309,121 @@ int fullOptimize(int bottom, int top, Matrix mat_a, Matrix mat_b){
 int simplecalc(int crossover, Matrix a, Matrix b){
     //Find time
     auto start = chrono::high_resolution_clock::now(); 
-    //strass(crossover, a, b);
+    strass(crossover, a, b);
     auto stop = chrono::high_resolution_clock::now(); 
     auto durationS = chrono::duration_cast<chrono::microseconds>(stop - start);
     cout << durationS.count();
     return 0;
 }
 
-//TODO: command line compatibility in main
 
 bool matrix_equal(Matrix a, Matrix b){
 	//assert(a.dims == b.dims);
 	for (int i=0; i < a.array_len; i++){
 		if (a.data[i] != b.data[i]){
+			cout << "Matrices are not equal\n";
 			return false;
 		}
 	}
+	cout << "Matrices are equal!\n";
 	return true;
 }
 
-// int triangleCount(int probability){
-//     //initialize a random 1024x1024 adjacency matrix
-//     Matrix mat(1024); //we hardcode this 
-//     int array_len = pow(1024,2);
-//     mat.init_randadjacency(probability);
-//     Matrix twomat = strass(mat, mat);
-//     Matrix threemat = strass(twomat, mat);
-//     //count number of triangles
-//     int diagonaledges = 0;
-//     for (int i = 0; i < array_len; i = i + array_len + 1){
-//         //We only hit the diagonal entries by adding dim + 1 to i each time
-//         if (mat.data[i] == 1){
-//             diagonaledges = diagonaledges + 1;
-//         }
-//     }
-//     int triangles = diagonaledges / 6;
-//     printf("Triangles: %d", triangles);
-//     return (triangles);
-// }
+ int triangleCount(int probability, int dimension){
+    //initialize a random 1024x1024 adjacency matrix
+    int array_len = pow(dimension,2);
+    Matrix mat(array_len); 
+    mat.init_randadjacency(probability);
+    Matrix twomat = strass(654, mat, mat);
+    Matrix threemat = strass(654, twomat, mat);
+    
+    //count number of triangles
+    int diagonaledges = 0;
+    for (int i = 0; i < array_len; i = i + dimension + 1){
+        //We only hit the diagonal entries by adding dim + 1 to i each time
+        if (mat.data[i] > 0){
+            diagonaledges = diagonaledges + mat.data[i];
+            cout << "triangle edge found";
+        }
+    }
+    int triangles = diagonaledges / 6;
+    printf("Triangles: %d", triangles);
+    return (triangles);
+}
 
 //change
 
-int main(int argc, char *argv[]){
-	if (argc != 2){
-		cout << "Try again with 2 command line arguments"
-		return 0;
-	}
-	dimension = argv[0];
-	filename = argv[1];
+// int main(int argc, char *argv[]){
+// 	if (argc != 2){
+// 		cout << "Try again with 2 command line arguments";
+// 		return 0;
+// 	}
+// 	int dimension = stoi(argv[0]);
+// 	string filename = argv[1];
 
-	cout << "conventional test: \n\n";
-	Matrix mat_a(dimension^2);
-	Matrix mat_b(dimension^2);
-	mat_a.init_rand();
-	mat_b.init_rand();
-	mat_a.print_matrix();
+int main(){
+	triangleCount(4, 3);
+	
+	//int dimension = 32;
+	//cout << "conventional test: \n\n";
+	//Matrix mat_a(pow(dimension, 2));
+	// Matrix mat_b(pow(dimension, 2));
+	// mat_a.init_rand();
+	// mat_b.init_rand();
+	// write_out("ascii_file.txt",0, mat_a);
+	// write_out("ascii_file.txt",1, mat_b);
+
+	// mat_a.print_matrix();
 	// mat_b.print_matrix();
 	// simplecalc(625, mat_a, mat_b);
-	fullOptimize(0, 1024, mat_a, mat_b);
+	// fullOptimize(0, 1024, mat_a, mat_b);
+	//debug = true;
+	
+	//cout << "Reading in file data \n";
+	//int* data_ptr = read_in("ascii_file.txt");
+    
+	//Matrix mat_c(data_ptr[0]);
+	//mat_c.read(data_ptr, "first");
+	// cout << "Matrix C: ";
+	// mat_c.print_matrix();
 
-    /*
-	int* data_ptr = read_in("ascii_file.txt");
+	//Matrix mat_d(data_ptr[0]);
+	//mat_d.read(data_ptr, "second");
+	// cout << "Matrix D: ";
+	// mat_d.print_matrix();
+	//delete data_ptr;
 
-	Matrix mat_c(data_ptr[0]);
-	mat_c.read(data_ptr, "first");
-	cout << "Matrix C: ";
-	mat_c.print_matrix();
+	// cout << "Testing combine and split \n";
 
-	Matrix mat_d(data_ptr[0]);
-	mat_d.read(data_ptr, "second");
-	cout << "Matrix D: ";
-	mat_d.print_matrix();
-	delete data_ptr;a
+	// cout << "Combined: ";
+	// Matrix test1 = combine(mat_c, mat_c, mat_c, mat_c);
+	// test1.print_matrix();
 
-	cout << "\nconventional dot product: ";
-	conventional(mat_c, mat_d).print_matrix();
+	// cout << "Split: ";
+	// Matrix test2 = split(test1, 0, 1);
+	// test2.print_matrix();
 
-	int* sol_ptr = read_in("solution.txt");
-	Matrix mat_sol(sol_ptr[0]*2);
-	mat_sol.read(sol_ptr, "all");
-	cout << "\nMatrix Solution: ";
-	mat_sol.print_matrix();
-	delete sol_ptr;
-    */
+	//cout << "Testing Strass crossover \n";
+	//Matrix strass_out = strass(8, mat_c, mat_d);
+
+	//strass_out.print_matrix();
+
+	//int* sol_ptr = read_in("solution.txt");
+	//Matrix mat_sol(sol_ptr[0]*2);
+	//mat_sol.read(sol_ptr, "all");
+	//cout << "\nMatrix Solution: ";
+	//mat_sol.print_matrix();
+	//delete sol_ptr;
+	//matrix_equal(mat_sol, strass_out);
+
+	// cout << "\nconventional dot product: ";
+	// Matrix dot = conv_mul(mat_c, mat_d);
+	// dot.print_matrix();
+
+	
+
+	
+
 	// check correctnes against python version
 
 	return 0;
