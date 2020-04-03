@@ -360,8 +360,8 @@ int main(int argc, char *argv[]){
 	}
 
 	string setting = argv[1];
-	int dimension = stoi(argv[1]);
-	string filename = argv[2];
+	int dimension = stoi(argv[2]);
+	string filename = argv[3];
 	int crossover = 32;
 
 	// Change global debug bool to print out dims during strassen
@@ -395,12 +395,12 @@ int main(int argc, char *argv[]){
 	    
 		Matrix mat_a(data_ptr[0]);
 		mat_a.read(data_ptr, "first");
-		cout << "Matrix C: ";
+		cout << "Matrix A: ";
 		mat_a.print_matrix();
 
 		Matrix mat_b(data_ptr[0]);
 		mat_b.read(data_ptr, "second");
-		cout << "Matrix D: ";
+		cout << "Matrix B: ";
 		mat_b.print_matrix();
 		delete data_ptr;
 
