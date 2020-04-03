@@ -360,7 +360,7 @@ bool matrix_equal(Matrix a, Matrix b){
 // 	string filename = argv[1];
 
 int main(){
-	// int dimension = 32;
+	// int dimension = 1024;
 	// cout << "conventional test: \n\n";
 	// Matrix mat_a(pow(dimension, 2));
 	// Matrix mat_b(pow(dimension, 2));
@@ -373,7 +373,6 @@ int main(){
 	// mat_b.print_matrix();
 	// simplecalc(625, mat_a, mat_b);
 	// fullOptimize(0, 1024, mat_a, mat_b);
-	debug = true;
 	
 	cout << "Reading in file data \n";
 	int* data_ptr = read_in("ascii_file.txt");
@@ -400,9 +399,9 @@ int main(){
 	// test2.print_matrix();
 
 	cout << "Testing Strass crossover \n";
-	Matrix strass_out = strass(16, mat_c, mat_d);
+	Matrix strass_out = strass(32, mat_c, mat_d);
 
-	strass_out.print_matrix();
+	// strass_out.print_matrix();
 
 	int* sol_ptr = read_in("solution.txt");
 	Matrix mat_sol(sol_ptr[0]*2);
