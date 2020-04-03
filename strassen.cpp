@@ -183,7 +183,7 @@ Matrix m_add(Matrix a, Matrix b){
 
 Matrix m_sub(Matrix a, Matrix b){
 	assert(a.dims == b.dims);
-	 if (debug) (cout << "Doing Subtract, A dims: " << a.dims << " B dims: " << b.dims << "\n");
+	if (debug) (cout << "Doing Subtract, A dims: " << a.dims << " B dims: " << b.dims << "\n");
 	Matrix output_matrix(a.array_len);
 
 	for (int i = 0; i < output_matrix.array_len; i++){
@@ -329,25 +329,27 @@ bool matrix_equal(Matrix a, Matrix b){
 	return true;
 }
 
-// int triangleCount(int probability){
-//     //initialize a random 1024x1024 adjacency matrix
-//     Matrix mat(1024); //we hardcode this 
-//     int array_len = pow(1024,2);
-//     mat.init_randadjacency(probability);
-//     Matrix twomat = strass(mat, mat);
-//     Matrix threemat = strass(twomat, mat);
-//     //count number of triangles
-//     int diagonaledges = 0;
-//     for (int i = 0; i < array_len; i = i + array_len + 1){
-//         //We only hit the diagonal entries by adding dim + 1 to i each time
-//         if (mat.data[i] == 1){
-//             diagonaledges = diagonaledges + 1;
-//         }
-//     }
-//     int triangles = diagonaledges / 6;
-//     printf("Triangles: %d", triangles);
-//     return (triangles);
-// }
+ int triangleCount(int probability, int dimension){
+    //initialize a random 1024x1024 adjacency matrix
+    int array_len = pow(dimension,2);
+    Matrix mat(array_len); 
+    mat.init_randadjacency(probability);
+    Matrix twomat = strass(654, mat, mat);
+    Matrix threemat = strass(654, twomat, mat);
+    
+    //count number of triangles
+    int diagonaledges = 0;
+    for (int i = 0; i < array_len; i = i + dimension + 1){
+        //We only hit the diagonal entries by adding dim + 1 to i each time
+        if (mat.data[i] > 0){
+            diagonaledges = diagonaledges + mat.data[i];
+            cout << "triangle edge found";
+        }
+    }
+    int triangles = diagonaledges / 6;
+    printf("Triangles: %d", triangles);
+    return (triangles);
+}
 
 //change
 
@@ -360,9 +362,10 @@ bool matrix_equal(Matrix a, Matrix b){
 // 	string filename = argv[1];
 
 int main(){
-	// int dimension = 32;
-	// cout << "conventional test: \n\n";
-	// Matrix mat_a(pow(dimension, 2));
+	triangleCount(4, 3);
+	//int dimension = 32;
+	//cout << "conventional test: \n\n";
+	//Matrix mat_a(pow(dimension, 2));
 	// Matrix mat_b(pow(dimension, 2));
 	// mat_a.init_rand();
 	// mat_b.init_rand();
@@ -373,21 +376,22 @@ int main(){
 	// mat_b.print_matrix();
 	// simplecalc(625, mat_a, mat_b);
 	// fullOptimize(0, 1024, mat_a, mat_b);
-	debug = true;
+  
+	//debug = true;
 	
-	cout << "Reading in file data \n";
-	int* data_ptr = read_in("ascii_file.txt");
-
-	Matrix mat_c(data_ptr[0]);
-	mat_c.read(data_ptr, "first");
+	//cout << "Reading in file data \n";
+	//int* data_ptr = read_in("ascii_file.txt");
+    
+	//Matrix mat_c(data_ptr[0]);
+	//mat_c.read(data_ptr, "first");
 	// cout << "Matrix C: ";
 	// mat_c.print_matrix();
 
-	Matrix mat_d(data_ptr[0]);
-	mat_d.read(data_ptr, "second");
+	//Matrix mat_d(data_ptr[0]);
+	//mat_d.read(data_ptr, "second");
 	// cout << "Matrix D: ";
 	// mat_d.print_matrix();
-	delete data_ptr;
+	//delete data_ptr;
 
 	// cout << "Testing combine and split \n";
 
@@ -398,6 +402,7 @@ int main(){
 	// cout << "Split: ";
 	// Matrix test2 = split(test1, 0, 1);
 	// test2.print_matrix();
+
 
 	cout << "Testing Strass crossover \n";
 	Matrix strass_out = strass(8, mat_c, mat_d);
