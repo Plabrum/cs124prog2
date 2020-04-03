@@ -172,7 +172,7 @@ Matrix conv_mul(Matrix a, Matrix b){
 }
 
 Matrix m_add(Matrix a, Matrix b){
-	//assert(a.dims == b.dims);
+	assert(a.dims == b.dims);
 	if (debug) (cout << "Doing Add, A dims: " << a.dims << " B dims: " << b.dims << "\n");
 	Matrix output_matrix(a.array_len);
 	for (int i = 0; i < output_matrix.array_len; i++){
@@ -182,8 +182,8 @@ Matrix m_add(Matrix a, Matrix b){
 }
 
 Matrix m_sub(Matrix a, Matrix b){
-	//assert(a.dims == b.dims);
-	 if (debug) (cout << "Doing Subtract, A dims: " << a.dims << " B dims: " << b.dims << "\n");
+	assert(a.dims == b.dims);
+	if (debug) (cout << "Doing Subtract, A dims: " << a.dims << " B dims: " << b.dims << "\n");
 	Matrix output_matrix(a.array_len);
 
 	for (int i = 0; i < output_matrix.array_len; i++){
@@ -363,7 +363,6 @@ bool matrix_equal(Matrix a, Matrix b){
 
 int main(){
 	triangleCount(4, 3);
-	
 	//int dimension = 32;
 	//cout << "conventional test: \n\n";
 	//Matrix mat_a(pow(dimension, 2));
@@ -377,6 +376,7 @@ int main(){
 	// mat_b.print_matrix();
 	// simplecalc(625, mat_a, mat_b);
 	// fullOptimize(0, 1024, mat_a, mat_b);
+  
 	//debug = true;
 	
 	//cout << "Reading in file data \n";
@@ -403,18 +403,19 @@ int main(){
 	// Matrix test2 = split(test1, 0, 1);
 	// test2.print_matrix();
 
-	//cout << "Testing Strass crossover \n";
-	//Matrix strass_out = strass(8, mat_c, mat_d);
 
-	//strass_out.print_matrix();
+	cout << "Testing Strass crossover \n";
+	Matrix strass_out = strass(8, mat_c, mat_d);
 
-	//int* sol_ptr = read_in("solution.txt");
-	//Matrix mat_sol(sol_ptr[0]*2);
-	//mat_sol.read(sol_ptr, "all");
-	//cout << "\nMatrix Solution: ";
-	//mat_sol.print_matrix();
-	//delete sol_ptr;
-	//matrix_equal(mat_sol, strass_out);
+	strass_out.print_matrix();
+
+	int* sol_ptr = read_in("solution.txt");
+	Matrix mat_sol(sol_ptr[0]*2);
+	mat_sol.read(sol_ptr, "all");
+	cout << "\nMatrix Solution: ";
+	mat_sol.print_matrix();
+	delete sol_ptr;
+	matrix_equal(mat_sol, strass_out);
 
 	// cout << "\nconventional dot product: ";
 	// Matrix dot = conv_mul(mat_c, mat_d);
