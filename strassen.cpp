@@ -353,88 +353,85 @@ bool matrix_equal(Matrix a, Matrix b){
 
 //change
 
-// int main(int argc, char *argv[]){
-// 	if (argc != 2){
-// 		cout << "Try again with 2 command line arguments";
-// 		return 0;
-// 	}
-// 	int dimension = stoi(argv[0]);
-// 	string filename = argv[1];
+int main(int argc, char *argv[]){
+	if (argc != 4){
+		cout << "format is ./strassen 0 dimension inputfile";
+		return 0;
+	}
 
-int main(){
-<<<<<<< HEAD
-	// int dimension = 1024;
-	// cout << "conventional test: \n\n";
-	// Matrix mat_a(pow(dimension, 2));
-=======
-	triangleCount(4, 3);
-	//int dimension = 32;
-	//cout << "conventional test: \n\n";
-	//Matrix mat_a(pow(dimension, 2));
->>>>>>> a77a427af044d428768d76e9ea18d0a7a5296e4a
-	// Matrix mat_b(pow(dimension, 2));
-	// mat_a.init_rand();
-	// mat_b.init_rand();
-	// write_out("ascii_file.txt",0, mat_a);
-	// write_out("ascii_file.txt",1, mat_b);
+	string setting = argv[1];
+	int dimension = stoi(argv[1]);
+	string filename = argv[2];
+	int crossover = 32;
 
-	// mat_a.print_matrix();
-	// mat_b.print_matrix();
+	// Change global debug bool to print out dims during strassen
+	debug = false;
+
+	if (setting == "0"){
+
+		//  Read in from file
+		int* data_ptr = read_in(filename);
+	    // write to matrix A
+		Matrix mat_a(data_ptr[0]);
+		mat_a.read(data_ptr, "first");
+		// Write to matrix B
+		Matrix mat_b(data_ptr[0]);
+		mat_b.read(data_ptr, "second");
+		// free memory
+		delete data_ptr;
+		// perform strassens
+		Matrix strass_out = strass(crossover, mat_a, mat_b);
+
+		// print out
+		strass_out.print_diags();
+	}
+	else if (setting == "1"){
+		// Do analysis for optimal cross over point
+
+	}
+	else if (setting == "2"){
+		cout << "Reading in file data \n";
+		int* data_ptr = read_in(filename);
+	    
+		Matrix mat_a(data_ptr[0]);
+		mat_a.read(data_ptr, "first");
+		cout << "Matrix C: ";
+		mat_a.print_matrix();
+
+		Matrix mat_b(data_ptr[0]);
+		mat_b.read(data_ptr, "second");
+		cout << "Matrix D: ";
+		mat_b.print_matrix();
+		delete data_ptr;
+
+		// perform strassens
+		Matrix strass_out = strass(crossover, mat_a, mat_b);
+
+		// check against solution
+		int* sol_ptr = read_in("solution.txt");
+		Matrix mat_sol(sol_ptr[0]*2);
+		mat_sol.read(sol_ptr, "all");
+		cout << "\nMatrix Solution: ";
+		mat_sol.print_matrix();
+		delete sol_ptr;
+		matrix_equal(mat_sol, strass_out);
+	}
+	else if (setting == "3"){
+		// Write to file only for debug
+		cout << "Writing Randomized Matrices to file: \n";
+		Matrix mat_a(pow(dimension, 2));
+		Matrix mat_b(pow(dimension, 2));
+		mat_a.init_rand();
+		mat_b.init_rand();
+		write_out("ascii_file.txt",0, mat_a);
+		write_out("ascii_file.txt",1, mat_b);
+	}
+	
+
+	// triangleCount(4, 3);
+
 	// simplecalc(625, mat_a, mat_b);
 	// fullOptimize(0, 1024, mat_a, mat_b);
-<<<<<<< HEAD
-=======
-  
-	//debug = true;
->>>>>>> a77a427af044d428768d76e9ea18d0a7a5296e4a
-	
-	//cout << "Reading in file data \n";
-	//int* data_ptr = read_in("ascii_file.txt");
-    
-	//Matrix mat_c(data_ptr[0]);
-	//mat_c.read(data_ptr, "first");
-	// cout << "Matrix C: ";
-	// mat_c.print_matrix();
-
-	//Matrix mat_d(data_ptr[0]);
-	//mat_d.read(data_ptr, "second");
-	// cout << "Matrix D: ";
-	// mat_d.print_matrix();
-	//delete data_ptr;
-
-	// cout << "Testing combine and split \n";
-
-	// cout << "Combined: ";
-	// Matrix test1 = combine(mat_c, mat_c, mat_c, mat_c);
-	// test1.print_matrix();
-
-	// cout << "Split: ";
-	// Matrix test2 = split(test1, 0, 1);
-	// test2.print_matrix();
-
-
-	cout << "Testing Strass crossover \n";
-	Matrix strass_out = strass(32, mat_c, mat_d);
-
-	// strass_out.print_matrix();
-
-	int* sol_ptr = read_in("solution.txt");
-	Matrix mat_sol(sol_ptr[0]*2);
-	mat_sol.read(sol_ptr, "all");
-	cout << "\nMatrix Solution: ";
-	mat_sol.print_matrix();
-	delete sol_ptr;
-	matrix_equal(mat_sol, strass_out);
-
-	// cout << "\nconventional dot product: ";
-	// Matrix dot = conv_mul(mat_c, mat_d);
-	// dot.print_matrix();
-
-	
-
-	
-
-	// check correctnes against python version
 
 	return 0;
 }
