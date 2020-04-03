@@ -259,13 +259,13 @@ Matrix strass(int crossover, Matrix a, Matrix b){
 		Matrix m6 = strass(crossover, m_sub(a21, a11), m_add(b11, b12));
 		Matrix m7 = strass(crossover, m_sub(a12, a22), m_add(b21, b22));
 
-		Matrix c11 = m_add(m1, m_sub(m4, m_add(m5, m7)));
+		Matrix c11 = m_add(m1, m_add(m_sub(m4, m5), m7));
 		Matrix c12 = m_add(m3, m5);
 		Matrix c21 = m_add(m2, m4);
-		Matrix c22 = m_sub(m1, m_add(m2, m_add(m3, m6)));
+		Matrix c22 = m_add(m_sub(m1,m2), m_add(m3, m6));
 
 		if (debug){
-			cout << "Completed strassen arthmetic, Dim Check!,";
+			cout << "Completed strassen arthmetic, Dim Check!";
 			cout << "\nc11: " << c11.dims << "\nc12: " << c12.dims << "\nc21: " << c21.dims << "\nc22: " << c22.dims << "\n";	
 		}
 		
@@ -400,7 +400,7 @@ int main(){
 	// test2.print_matrix();
 
 	cout << "Testing Strass crossover \n";
-	Matrix strass_out = strass(8, mat_c, mat_d);
+	Matrix strass_out = strass(16, mat_c, mat_d);
 
 	strass_out.print_matrix();
 
