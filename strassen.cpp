@@ -5,14 +5,6 @@
 #include <chrono>
 using namespace std;
 
-// after this point normal matrix operation will take over
-int crossover = 128;
-// int dimension = 2048;
-int dimension = 4;
-int current_dim = dimension;
-
-
-
 // NOTES
 // Change to be able to handle 32 bit numbers - perhaps use long int
 
@@ -185,10 +177,10 @@ Matrix m_sub(Matrix a, Matrix b){
 
 Matrix combine(Matrix a, Matrix b, Matrix c, Matrix d){
 
-	Matrix output_matrix(pow(a.dims*2, 2))
+	Matrix output_matrix(pow(a.dims*2, 2));
 	// go through output
 	for (int i=0; i<output_matrix.dims; i++){
-		for (int j=0; j<output_matrix; j++){
+		for (int j=0; j<output_matrix.dims; j++){
 			if (i<a.dims){
 				if (j<a.dims){
 					// top left
@@ -215,6 +207,17 @@ Matrix combine(Matrix a, Matrix b, Matrix c, Matrix d){
 	return output_matrix;
 }
 
+Matrix split(Matrix a, int split_num){
+	Matrix output_matrix(pow(a.dims/2, 2));
+	for (int i=0; i<output_matrix.dims; i++){
+		for (int j=0; j<output_matrix.dims; j++){
+			output_matrix.data[(i*output_matrix.dims) +j] = 
+		}
+	}
+	
+	return output_matrix;
+}
+
 Matrix strass(int crossover, Matrix a, Matrix b){
 	if (a.dims > crossover){
 		//perform strassen
@@ -229,13 +232,13 @@ Matrix strass(int crossover, Matrix a, Matrix b){
 		Matrix b22 = split(b, 4);
 
 
-		Matrix m1 = conv_mul(m_add(a11, a22), m_add(b11, b22));
-		Matrix m2 = conv_mul(m_add(a21, a22), b11);
-		Matrix m3 = conv_mul(a11, m_sub(b12, b22));
-		Matrix m4 = conv_mul(a22, m_sub(b21, b11));
-		Matrix m5 = conv_mul(m_add(a11, a12), b22);
-		Matrix m6 = conv_mul(m_sub(a21, a11), m_add(b11, b12));
-		Matrix m7 = conv_mul(m_sub(a12, a22), m_add(b21, b22));
+		Matrix m1 = strass(crossover, m_add(a11, a22), m_add(b11, b22));
+		Matrix m2 = strass(crossover, m_add(a21, a22), b11);
+		Matrix m3 = strass(crossover, a11, m_sub(b12, b22));
+		Matrix m4 = strass(crossover, a22, m_sub(b21, b11));
+		Matrix m5 = strass(crossover, m_add(a11, a12), b22);
+		Matrix m6 = strass(crossover, m_sub(a21, a11), m_add(b11, b12));
+		Matrix m7 = strass(crossover, m_sub(a12, a22), m_add(b21, b22));
 
 		Matrix c11 = m_add(m1, m_sub(m4, m_add(m5, m7)));
 		Matrix c12 = m_add(m3, m5);
@@ -244,11 +247,11 @@ Matrix strass(int crossover, Matrix a, Matrix b){
 		return combine(c11,c12,c21,c22);
 	}
 	else{
-		return conv_mul(a,b)
+		return conv_mul(a,b);
 	}
 }
 
-int fullOptimize(int bottom, int top, Matrix mat_a, Matrix mat_b){
+void fullOptimize(int bottom, int top, Matrix mat_a, Matrix mat_b){
     //Find goal time
     auto start1 = chrono::high_resolution_clock::now(); 
     //strass(top, mat_a, mat_b);
@@ -280,7 +283,7 @@ int fullOptimize(int bottom, int top, Matrix mat_a, Matrix mat_b){
 int simplecalc(int crossover, Matrix a, Matrix b){
     //Find time
     auto start = chrono::high_resolution_clock::now(); 
-    //strass(crossover, a, b);
+    strass(crossover, a, b);
     auto stop = chrono::high_resolution_clock::now(); 
     auto durationS = chrono::duration_cast<chrono::microseconds>(stop - start);
     cout << durationS.count();
@@ -323,6 +326,7 @@ bool matrix_equal(Matrix a, Matrix b){
 //change
 
 int main(){
+	/*
 	cout << "conventional test: \n\n";
 	Matrix mat_a(dimension^2);
 	Matrix mat_b(dimension^2);
@@ -332,32 +336,33 @@ int main(){
 	// mat_b.print_matrix();
 	// simplecalc(625, mat_a, mat_b);
 	fullOptimize(0, 1024, mat_a, mat_b);
+	*/
 
-	// int* data_ptr = read_in("ascii_file.txt");
+	int* data_ptr = read_in("ascii_file.txt");
 
-	// Matrix mat_c(data_ptr[0]);
-	// mat_c.read(data_ptr, "first");
-	// cout << "Matrix C: ";
-	// mat_c.print_matrix();
+	Matrix mat_c(data_ptr[0]);
+	mat_c.read(data_ptr, "first");
+	cout << "Matrix C: ";
+	mat_c.print_matrix();
 
-	// Matrix mat_d(data_ptr[0]);
-	// mat_d.read(data_ptr, "second");
-	// cout << "Matrix D: ";
-	// mat_d.print_matrix();
-	// delete data_ptr;a
+	Matrix mat_d(data_ptr[0]);
+	mat_d.read(data_ptr, "second");
+	cout << "Matrix D: ";
+	mat_d.print_matrix();
+	delete data_ptr;
 
-	// cout << "\nconventional dot product: ";
-	// Matrix dot = conv_mul(mat_c, mat_d);
-	// dot.print_matrix();
+	cout << "\nconventional dot product: ";
+	Matrix dot = conv_mul(mat_c, mat_d);
+	dot.print_matrix();
 
-	// int* sol_ptr = read_in("solution.txt");
-	// Matrix mat_sol(sol_ptr[0]*2);
-	// mat_sol.read(sol_ptr, "all");
-	// cout << "\nMatrix Solution: ";
-	// mat_sol.print_matrix();
-	// delete sol_ptr;
+	int* sol_ptr = read_in("solution.txt");
+	Matrix mat_sol(sol_ptr[0]*2);
+	mat_sol.read(sol_ptr, "all");
+	cout << "\nMatrix Solution: ";
+	mat_sol.print_matrix();
+	delete sol_ptr;
 
-	// matrix_equal(mat_sol, dot);
+	matrix_equal(mat_sol, dot);
 
 	// check correctnes against python version
 
