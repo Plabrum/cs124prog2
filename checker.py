@@ -30,8 +30,8 @@ def convert_o(arr):
 
 fin = np.dot(convert_i(a), convert_i(b))
 
-print(fin)
-print(convert_o(fin))
+# print(fin)
+# print(convert_o(fin))
 
 o = open("solution.txt", 'w')
 o.write(convert_o(fin))
