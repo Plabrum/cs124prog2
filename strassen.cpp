@@ -278,12 +278,13 @@ Matrix strass(int crossover, Matrix a, Matrix b){
 }
 
 void fullOptimize(int bottom, int top, Matrix mat_a, Matrix mat_b){
+	cout << "optimisation run \n";
     //Find goal time
     auto start1 = chrono::high_resolution_clock::now(); 
     strass(top, mat_a, mat_b);
     auto stop1 = chrono::high_resolution_clock::now(); 
     auto durationtop = chrono::duration_cast<chrono::microseconds>(stop1 - start1); 
-
+    cout << "optimisation step 1 run \n";
     auto start2 = chrono::high_resolution_clock::now(); 
     strass(bottom, mat_a, mat_b);
     auto stop2 = chrono::high_resolution_clock::now(); 
@@ -389,7 +390,7 @@ int main(int argc, char *argv[]){
 		// Do analysis for optimal cross over point
 		// triangleCount(4, 3);
 		// simplecalc(625, mat_a, mat_b);
-		
+
 		//  Read in from file
 		int* data_ptr = read_in(filename);
 	    // write to matrix A
@@ -401,7 +402,7 @@ int main(int argc, char *argv[]){
 		// free memory
 		delete data_ptr;
 
-		fullOptimize(0, 1024, mat_a, mat_b);
+		fullOptimize(2, 1024, mat_a, mat_b);
 
 	}
 	else if (setting == "2"){
