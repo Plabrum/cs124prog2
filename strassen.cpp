@@ -153,7 +153,6 @@ void write_out(string filename, bool add, Matrix a){
 
 Matrix conv_mul(Matrix a, Matrix b){
 	// perform conventional matrix multi
-	//assert(a.dims == b.dims);
 	Matrix output_matrix(a.array_len);
 
 	// iterate through the output matrix
@@ -172,7 +171,6 @@ Matrix conv_mul(Matrix a, Matrix b){
 }
 
 Matrix m_add(Matrix a, Matrix b){
-	assert(a.dims == b.dims);
 	if (debug) (cout << "Doing Add, A dims: " << a.dims << " B dims: " << b.dims << "\n");
 	Matrix output_matrix(a.array_len);
 	for (int i = 0; i < output_matrix.array_len; i++){
@@ -182,7 +180,6 @@ Matrix m_add(Matrix a, Matrix b){
 }
 
 Matrix m_sub(Matrix a, Matrix b){
-	assert(a.dims == b.dims);
 	if (debug) (cout << "Doing Subtract, A dims: " << a.dims << " B dims: " << b.dims << "\n");
 	Matrix output_matrix(a.array_len);
 
@@ -319,7 +316,6 @@ int simplecalc(int crossover, Matrix a, Matrix b){
 
 
 bool matrix_equal(Matrix a, Matrix b){
-	//assert(a.dims == b.dims);
 	for (int i=0; i < a.array_len; i++){
 		if (a.data[i] != b.data[i]){
 			cout << "Matrices are not equal\n";
