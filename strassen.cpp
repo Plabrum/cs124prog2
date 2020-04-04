@@ -330,20 +330,19 @@ bool matrix_equal(Matrix a, Matrix b){
 	return true;
 }
 
- int triangleCount(int probability, int dimension){
+int triangleCount(int probability, int dimension){
     //initialize a random 1024x1024 adjacency matrix
     int array_len = pow(dimension,2);
     Matrix mat(array_len); 
     mat.init_randadjacency(probability);
-    Matrix twomat = strass(654, mat, mat);
-    Matrix threemat = strass(654, twomat, mat);
-    
+    Matrix twomat = strass(256, mat, mat);
+    Matrix threemat = strass(256, twomat, mat);
     //count number of triangles
     int diagonaledges = 0;
     for (int i = 0; i < array_len; i = i + dimension + 1){
         //We only hit the diagonal entries by adding dim + 1 to i each time
-        if (mat.data[i] > 0){
-            diagonaledges = diagonaledges + mat.data[i];
+        if (threemat.data[i] > 0){
+            diagonaledges = diagonaledges + threemat.data[i];
             cout << "triangle edge found";
         }
     }
@@ -363,7 +362,7 @@ int main(int argc, char *argv[]){
 	string setting = argv[1];
 	int dimension = stoi(argv[2]);
 	string filename = argv[3];
-	int crossover = 32;
+	int crossover = 256;
 
 	// Change global debug bool to print out dims during strassen
 	debug = false;
